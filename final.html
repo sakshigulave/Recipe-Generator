@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recipe Generator</title>
+    <!-- Add Font Awesome link -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <style>
+      /* Add your existing styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background: url("https://wallpaperaccess.com/full/3691432.jpg")
+          no-repeat center center fixed;
+        background-size: cover;
+        color: #333;
+        text-align: center;
+        min-height: 100vh;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow-y: auto;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 800px;
+        padding: 20px;
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        position: relative;
+        text-align: center;
+        z-index: 1;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      h1 {
+        color: #ff5733;
+        font-size: 2.5em;
+        margin-bottom: 20px;
+      }
+
+      .input-field {
+        margin-top: 20px;
+        padding: 10px;
+        font-size: 1.2em;
+        width: 80%;
+        max-width: 400px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+      }
+
+      .output {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #f1f1f1;
+        border-radius: 8px;
+        text-align: left;
+        min-height: 60px;
+      }
+
+      .option-buttons {
+        margin-top: 20px;
+      }
+
+      .option-buttons button {
+        padding: 10px 20px;
+        font-size: 1em;
+        background-color: #ff5733;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 5px;
+        transition: background-color 0.3s;
+      }
+
+      .option-buttons button:hover {
+        background-color: #d04e28;
+      }
+
+      .ingredients,
+      .procedure {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #fff;
+        border-radius: 8px;
+        text-align: left;
+      }
+
+      .show-procedure-btn {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #ff5733;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      .show-procedure-btn:hover {
+        background-color: #d04e28;
+      }
+
+      .recipe-image {
+        margin-top: 20px;
+        max-width: 100%;
+        border-radius: 9px;
+        max-height: 500px;
+        object-fit: contain;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      /* History section styles */
+      #history {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: rgba(255, 255, 255, 0.7);
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        max-height: 60vh;
+        overflow-y: auto;
+        font-size: 1em;
+      }
+
+      #history h2 {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+
+      #history ul {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      #history li {
+        padding: 5px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        background-color: #f1f1f1;
+        border-radius: 5px;
+        text-align: center;
+      }
+
+      #history li:hover {
+        background-color: #ff5733;
+        color: white;
+      }
+
+      #delete-history-btn {
+        margin-top: 10px;
+        padding: 10px 20px;
+        background-color: #ff5733;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      #delete-history-btn:hover {
+        background-color: #d04e28;
+      }
+
+      /* Translation section styles */
+      #translation-buttons {
+        display: none;
+      }
+
+      #language-options {
+        display: none;
+        margin-top: 20px;
+      }
+
+      #language-options select,
+      #language-options button {
+        padding: 10px;
+        font-size: 1em;
+        background-color: #ff5733;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 5px;
+      }
+
+      #language-options select {
+        width: 200px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>Recipe Generator</h1>
+      <p>Please type the name of the recipe.</p>
+
+      <!-- Text input field -->
+      <input
+        type="text"
+        id="recipe-input"
+        class="input-field"
+        placeholder="Type recipe name..."
+        onkeydown="handleKeydown(event)"
+      />
+
+      <!-- Output area for recipe name -->
+      <div id="output" class="output"></div>
+
+      <!-- Recipe Image -->
+      <img id="recipe-image" class="recipe-image" style="display: none" />
+
+      <!-- Ingredients and procedure -->
+      <div id="ingredients" class="ingredients" style="display: none"></div>
+      <button
+        id="read-ingredients-btn"
+        class="show-procedure-btn"
+        style="display: none"
+        onclick="toggleReadIngredients()"
+      >
+        Read Ingredients
+      </button>
+
+      <button
+        id="show-procedure-btn"
+        class="show-procedure-btn"
+        style="display: none"
+        onclick="showProcedure()"
+      >
+        Show Procedure
+      </button>
+
+      <div id="procedure" class="procedure" style="display: none"></div>
+      <button
+        id="read-procedure-btn"
+        class="show-procedure-btn"
+        style="display: none"
+        onclick="toggleReadProcedure()"
+      >
+        Read Procedure
+      </button>
+
+      <!-- Translation button and dropdown -->
+      <div class="option-buttons" id="translation-buttons">
+        <button id="translate-btn" onclick="showLanguageOptions()">
+          🔄 Translate
+        </button>
+      </div>
+
+      <!-- Language selection for translation -->
+      <div id="language-options">
+        <select
+          id="language-selector"
+          onchange="translateIngredientsAndProcedure()"
+        >
+          <option value="hi">Hindi</option>
+          <option value="es">Spanish</option>
+          <option value="fr">French</option>
+          <option value="ur">Urdu</option>
+          <option value="mr">Marathi</option>
+          <option value="ar">Arabic</option>
+          <option value="de">German</option>
+          <!-- Add more languages as per your requirement -->
+        </select>
+        <button onclick="translateIngredientsAndProcedure()">Translate</button>
+      </div>
+    </div>
+
+    <!-- Recipe History Section -->
+    <div id="history">
+      <h2>Search History</h2>
+      <ul id="history-list"></ul>
+      <!-- Add Font Awesome history icon to the delete button -->
+      <button id="delete-history-btn" onclick="deleteHistory()">
+        <i class="fas fa-history"></i> Delete History
+      </button>
+    </div>
+
+    <script>
+      const outputDiv = document.getElementById("output");
+      const recipeInputField = document.getElementById("recipe-input");
+      const ingredientsDiv = document.getElementById("ingredients");
+      const procedureDiv = document.getElementById("procedure");
+      const showProcedureBtn = document.getElementById("show-procedure-btn");
+      const recipeImage = document.getElementById("recipe-image");
+      const readIngredientsBtn = document.getElementById(
+        "read-ingredients-btn"
+      );
+      const readProcedureBtn = document.getElementById("read-procedure-btn");
+      const historyList = document.getElementById("history-list");
+
+      let recipeName = "";
+      let currentRecipeDetails = {};
+      let speechSynthesisUtterance = null;
+
+      // Function to handle the keydown event and save to history on Enter key press
+      function handleKeydown(event) {
+        if (event.key === "Enter") {
+          // Check if 'Enter' key is pressed
+          recipeName = recipeInputField.value.trim().toLowerCase();
+          if (recipeName) {
+            updateRecipeName(); // Update the recipe name
+            saveToHistory(recipeName); // Save it to the history
+          }
+        }
+      }
+
+      // Update recipe name from text input
+      function updateRecipeName() {
+        outputDiv.textContent = `You typed: "${recipeName}"`;
+        if (recipeName) {
+          showIngredientsAndProcedure(recipeName);
+        }
+      }
+
+      // Save the recipe name to localStorage and update the history list
+      function saveToHistory(recipe) {
+        let history = JSON.parse(localStorage.getItem("recipeHistory")) || [];
+        if (!history.includes(recipe)) {
+          history.push(recipe);
+          localStorage.setItem("recipeHistory", JSON.stringify(history));
+          updateHistoryList();
+        }
+      }
+
+      // Update the history list UI
+      function updateHistoryList() {
+        let history = JSON.parse(localStorage.getItem("recipeHistory")) || [];
+        historyList.innerHTML = "";
+        history.forEach((recipe) => {
+          let listItem = document.createElement("li");
+          listItem.textContent = recipe;
+          listItem.onclick = function () {
+            recipeInputField.value = recipe;
+            updateRecipeName(); // Trigger the updateRecipeName function again
+          };
+          historyList.appendChild(listItem);
+        });
+      }
+
+      // Delete the history from localStorage
+      function deleteHistory() {
+        localStorage.removeItem("recipeHistory");
+        updateHistoryList();
+      }
+
+      // Fetch ingredients and procedure based on recipe
+      function showIngredientsAndProcedure(recipe) {
+        fetch(`http://localhost:5000/api/recipe/${recipe}`)
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.error) {
+              outputDiv.textContent = `Sorry, we don't have the recipe for "${recipe}".`;
+              ingredientsDiv.style.display = "none";
+              procedureDiv.style.display = "none";
+            } else {
+              currentRecipeDetails = data;
+              outputDiv.innerHTML = `<strong>Recipe Name:</strong> ${data.TranslatedRecipeName}<br /><strong>Cuisine:</strong> ${data.Cuisine}`;
+              recipeImage.src = data["image-url"];
+              recipeImage.style.display = "block";
+
+              // Display ingredients
+              ingredientsDiv.innerHTML = "<strong>Ingredients:</strong><ul>";
+              const ingredients = data.TranslatedIngredients
+                ? data.TranslatedIngredients.split(",")
+                : [];
+              if (ingredients.length > 0) {
+                ingredients.forEach((ingredient) => {
+                  ingredientsDiv.innerHTML += `<li>${ingredient.trim()}</li>`;
+                });
+              } else {
+                ingredientsDiv.innerHTML +=
+                  "<li>No ingredients available.</li>";
+              }
+              ingredientsDiv.innerHTML += "</ul>";
+              ingredientsDiv.style.display = "block";
+
+              // Show the "Read Ingredients" button
+              readIngredientsBtn.style.display = "block";
+
+              // Show the "Show Procedure" button
+              showProcedureBtn.style.display = "block";
+
+              // Show the "Read Procedure" button
+              readProcedureBtn.style.display = "block";
+
+              // Show the translation button
+              document.getElementById("translation-buttons").style.display =
+                "block";
+            }
+          })
+          .catch((error) => {
+            outputDiv.textContent = `Error fetching recipe: ${error}`;
+          });
+      }
+
+      // Show procedure when clicked
+      function showProcedure() {
+        if (currentRecipeDetails.TranslatedInstructions) {
+          procedureDiv.innerHTML = "<strong>Procedure:</strong><ol>";
+          const steps = currentRecipeDetails.TranslatedInstructions.split("\n");
+          steps.forEach((step) => {
+            procedureDiv.innerHTML += `<li>${step.trim()}</li>`;
+          });
+          procedureDiv.innerHTML += "</ol>";
+          procedureDiv.style.display = "block";
+        } else {
+          procedureDiv.textContent = "No procedure available.";
+        }
+      }
+
+      // Toggle read ingredients aloud
+      function toggleReadIngredients() {
+        if (speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+          readIngredientsBtn.textContent = "Read Ingredients";
+        } else {
+          const ingredientsText = ingredientsDiv.innerText;
+          speechSynthesisUtterance = new SpeechSynthesisUtterance(
+            ingredientsText
+          );
+          window.speechSynthesis.speak(speechSynthesisUtterance);
+          readIngredientsBtn.textContent = "Stop Reading Ingredients";
+        }
+      }
+
+      // Toggle read procedure aloud
+      function toggleReadProcedure() {
+        if (speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+          readProcedureBtn.textContent = "Read Procedure";
+        } else {
+          const procedureText = procedureDiv.innerText;
+          speechSynthesisUtterance = new SpeechSynthesisUtterance(
+            procedureText
+          );
+          window.speechSynthesis.speak(speechSynthesisUtterance);
+          readProcedureBtn.textContent = "Stop Reading Procedure";
+        }
+      }
+
+      // Show language options for translation
+      function showLanguageOptions() {
+        document.getElementById("language-options").style.display = "block";
+      }
+
+      // Handle translation when user selects a language
+      function translateIngredientsAndProcedure() {
+        const targetLanguage =
+          document.getElementById("language-selector").value;
+
+        // Translate Ingredients
+        fetchTranslation(
+          currentRecipeDetails.TranslatedIngredients,
+          targetLanguage,
+          "ingredients"
+        );
+
+        // Translate Procedure
+        fetchTranslation(
+          currentRecipeDetails.TranslatedInstructions,
+          targetLanguage,
+          "procedure"
+        );
+      }
+
+      // Fetch translation from backend API
+      function fetchTranslation(text, targetLanguage, type) {
+        fetch("http://localhost:5000/api/translate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text: text, targetLanguage: targetLanguage }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (type === "ingredients") {
+              ingredientsDiv.innerHTML = "<strong>Ingredients:</strong><ul>";
+              const translatedIngredients = data.translatedText.split(",");
+              translatedIngredients.forEach((ingredient) => {
+                ingredientsDiv.innerHTML += `<li>${ingredient.trim()}</li>`;
+              });
+              ingredientsDiv.innerHTML += "</ul>";
+            } else if (type === "procedure") {
+              procedureDiv.innerHTML = "<strong>Procedure:</strong><ol>";
+              const translatedSteps = data.translatedText.split("\n");
+              translatedSteps.forEach((step) => {
+                procedureDiv.innerHTML += `<li>${step.trim()}</li>`;
+              });
+              procedureDiv.innerHTML += "</ol>";
+            }
+          })
+          .catch((error) => {
+            console.error("Translation error:", error);
+          });
+      }
+
+      // Initialize history list on page load
+      window.onload = function () {
+        updateHistoryList();
+      };
+    </script>
+  </body>
+</html>
